@@ -52,9 +52,25 @@ regd_users.post("/login", (req,res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
-});
+    let loggedInUser = req.session.authorization['username'];
+    let book = books[parseInt(req.params.isbn)];
+    let review = req.query.review;
+    let numberOfReviews = Object.keys(book.reviews).length;
+    let newEntry = numberOfReviews + 1;
+    // loop through the reviews to see if the user has already made a review
+    Object.keys(book.reviews).forEach((entry) => {
+      if (entry.user === loggedInUser) {
+          // replace the existing review with the current review
+          entry.text = review;
+          return res.status(200).json({message: "Review updated"});
+      }
+    })
+    // if the user was not found, then this is a new entry to add
+    let newReview = {"user": loggedInUser, "text": review};
+    Object.assign(book.reviews, {newEntry: newReview});
+  
+    return res.status(200).json({message: "Review added"});
+  });
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
