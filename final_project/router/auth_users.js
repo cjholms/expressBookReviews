@@ -79,6 +79,28 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
 
 });
 
+// delete a book review
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    let loggedInUser = req.session.authorization['username'];
+    let book = books[parseInt(req.params.isbn)];
+    let userFound = false;
+
+    // loop through the reviews to see if the user has already made a review
+    Object.keys(book.reviews).forEach((entry) => {
+        if (book.reviews[parseInt(entry)].user === loggedInUser) {
+            // delete the review
+            delete book.reviews[parseInt(entry)];
+            userFound = true;
+            return res.status(200).json({ message: "Review deleted" });
+        }
+    });
+
+    // if the user was not found, then send back an appropriate message
+    if (!userFound) {
+        return res.status(200).json({ message: "No review found for given user" });
+    }
+});
+
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
 module.exports.users = users;
